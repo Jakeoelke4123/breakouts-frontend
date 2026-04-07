@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Breakouts &mdash; Terminal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+/* ============================================================================
+   BREAKOUTS BY CLAUDE & DEADSHOT — Design System v2
+   Colors: Dark grey bg, Light blue accents, Green/Red sentiment
+   ============================================================================ */
+:root {
+  --bg-primary: #1c1c1c;
+  --bg-secondary: #161616;
+  --bg-card: #242424;
+  --bg-card-hover: #2c2c2c;
+  --bg-surface: rgba(255,255,255,0.02);
+
+  --accent: #4fc3f7;
+  --accent-dim: rgba(79,195,247,0.15);
+  --accent-glow: rgba(79,195,247,0.25);
+
+  --green: #00e676;
+  --green-bg: rgba(0,230,118,0.15);
+  --green-border: rgba(0,230,118,0.45);
+  --green-glow: rgba(0,230,118,0.3);
+
+  --red: #ff5252;
+  --red-bg: rgba(255,82,82,0.15);
+  --red-border: rgba(255,82,82,0.45);
+  --red-glow: rgba(255,82,82,0.3);
+
+  --yellow: #ffd740;
+  --yellow-bg: rgba(255,215,64,0.08);
+  --yellow-border: rgba(255,215,64,0.2);
+
+  --text-primary: #e8e8e8;
+  --text-secondary: #999999;
+  --text-dim: #666666;
+  --text-muted: #444444;
+
+  --border: rgba(255,255,255,0.08);
+  --border-accent: rgba(79,195,247,0.2);
+
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+  --font-sans: 'Inter', -apple-system, sans-serif;
+
+  --radius: 10px;
+  --radius-sm: 6px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: var(--bg-secondary); }
+::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+@keyframes slideDown { from{opacity:0;transform:translateY(-12px)} to{opacity:1;transform:translateY(0)} }
+@keyframes fadeIn { from{opacity:0} to{opacity:1} }
+@keyframes glow { 0%,100%{box-shadow:0 0 8px var(--accent-glow)} 50%{box-shadow:0 0 20px var(--accent-glow)} }
+
+.mono { font-family: var(--font-mono); }
+
+/* ============================================================================
+   HEADER
+   ============================================================================ */
+.header {
+  padding: 14px 28px;
+  display: flex; justify-content: space-between; align-items: center;
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(180deg, rgba(28,28,28,0.95), var(--bg-primary));
+}
+.header-left { display: flex; align-items: center; gap: 14px; }
+
+.live-dot {
+  width: 9px; height: 9px; border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 12px var(--green-glow);
+  animation: pulse 2s ease-in-out infinite;
+}
+.dead-dot {
+  width: 9px; height: 9px; border-radius: 50%;
+  background: var(--red);
+  box-shadow: 0 0 12px var(--red-glow);
+  animation: pulse 1s ease-in-out infinite;
+}
+
+.brand {
+  font-size: 20px; font-weight: 900; letter-spacing: 0.06em;
+  color: var(--accent);
+}
+.brand-sub {
+  font-size: 10px; color: var(--text-dim); letter-spacing: 0.12em;
+  margin-top: 1px;
+}
+
+.nav { display: flex; gap: 4px; }
+.nav-btn {
+  font-family: var(--font-mono);
+  font-size: 11px; font-weight: 600; letter-spacing: 0.08em;
+  padding: 7px 16px; border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  background: transparent; color: var(--text-secondary);
+  cursor: pointer; transition: all 0.2s;
+}
+.nav-btn:hover { background: var(--bg-surface); color: var(--text-primary); }
+.nav-btn.active {
+  background: var(--accent-dim);
+  color: var(--accent);
+  border-color: var(--border-accent);
+}
+
+.header-right { display: flex; align-items: center; gap: 20px; }
+.clock {
+  font-size: 20px; font-weight: 700; color: var(--accent);
+  letter-spacing: 0.04em;
+}
+.market-badge {
+  font-size: 10px; font-weight: 700; letter-spacing: 0.08em;
+  padding: 4px 10px; border-radius: var(--radius-sm);
+}
+.market-open { color: var(--green); background: var(--green-bg); border: 1px solid var(--green-border); }
+.market-closed { color: var(--red); background: var(--red-bg); border: 1px solid var(--red-border); }
+
+/* ============================================================================
+   STATS BAR
+   ============================================================================ */
+.stats-bar {
+  padding: 10px 28px;
+  display: flex; align-items: center; gap: 24px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-surface);
+}
+.stat { display: flex; align-items: center; gap: 7px; }
+.stat-label { font-size: 10px; color: var(--text-dim); letter-spacing: 0.1em; }
+.stat-value { font-size: 15px; font-weight: 800; }
+.divider { width: 1px; height: 18px; background: var(--border); }
+
+/* ============================================================================
+   MAIN 2-COLUMN LAYOUT
+   ============================================================================ */
+.terminal-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  min-height: calc(100vh - 140px);
+}
+
+.column {
+  padding: 20px;
+  overflow-y: auto;
+}
+.column:first-child {
+  border-right: 1px solid var(--border);
+}
+
+.column-header {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.12em;
+  color: var(--text-dim);
+  margin-bottom: 16px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+  display: flex; justify-content: space-between; align-items: center;
+}
+.column-count {
+  font-size: 20px; font-weight: 800; color: var(--accent);
+}
+
+/* ============================================================================
+   STOCK CARDS — Key Levels (Column 1)
+   ============================================================================ */
+.stock-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  margin-bottom: 12px;
+  transition: all 0.2s;
+}
+.stock-card:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--border-accent);
+}
+
+.stock-card.bullish {
+  border-left: 4px solid var(--green);
+  background: linear-gradient(90deg, rgba(0,230,118,0.1), var(--bg-card));
+  box-shadow: inset 0 0 30px rgba(0,230,118,0.04);
+}
+.stock-card.bearish {
+  border-left: 4px solid var(--red);
+  background: linear-gradient(90deg, rgba(255,82,82,0.1), var(--bg-card));
+  box-shadow: inset 0 0 30px rgba(255,82,82,0.04);
+}
+
+.card-top {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.ticker-name {
+  font-size: 22px; font-weight: 900; letter-spacing: 0.04em;
+  color: var(--text-primary);
+}
+
+.card-price {
+  text-align: right;
+}
+.price-big {
+  font-size: 22px; font-weight: 800;
+  transition: color 0.15s;
+}
+.price-up { color: var(--green); }
+.price-down { color: var(--red); }
+.price-flat { color: var(--text-primary); }
+
+.change-text {
+  font-size: 12px; font-weight: 600; margin-top: 2px;
+}
+
+.sentiment-pill {
+  display: inline-block;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+.sentiment-pill.bullish { background: var(--green); box-shadow: 0 0 6px var(--green-glow); }
+.sentiment-pill.bearish { background: var(--red); box-shadow: 0 0 6px var(--red-glow); }
+
+/* Level section headers inside cards */
+.level-section {
+  font-size: 9px; font-weight: 700; letter-spacing: 0.1em;
+  color: var(--text-dim);
+  margin-top: 10px; margin-bottom: 4px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(255,255,255,0.03);
+}
+.level-section:first-of-type { margin-top: 0; padding-top: 0; border-top: none; }
+
+/* Level rows inside a card */
+.level-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 5px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.02);
+  font-size: 13px;
+}
+.level-row:last-child { border-bottom: none; }
+
+.level-label {
+  color: var(--text-secondary);
+  font-size: 11px; font-weight: 500;
+  min-width: 130px;
+}
+.level-price {
+  font-weight: 700; font-size: 15px;
+  color: var(--text-primary);
+}
+.level-distance {
+  font-size: 10px;
+  color: var(--text-dim);
+  min-width: 50px;
+  text-align: right;
+}
+
+/* Probability badge (inline) */
+.prob-inline {
+  font-size: 9px; font-weight: 700;
+  padding: 1px 6px; border-radius: 3px;
+  margin-left: 6px;
+}
+.prob-high-inline { color: var(--green); background: var(--green-bg); }
+.prob-mid-inline { color: var(--yellow); background: var(--yellow-bg); }
+.prob-low-inline { color: var(--text-dim); background: rgba(255,255,255,0.04); }
+
+/* FVG zone indicator */
+.fvg-zone {
+  font-size: 10px; color: var(--text-dim);
+  padding: 2px 0 0 2px;
+}
+
+/* ============================================================================
+   ALERT CARDS — (Column 2)
+   ============================================================================ */
+.alert-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 18px;
+  margin-bottom: 10px;
+  animation: slideDown 0.3s ease-out;
+  transition: all 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+
+.alert-card.bullish {
+  border-left: 4px solid var(--green);
+  background: linear-gradient(90deg, rgba(0,230,118,0.08), var(--bg-card));
+}
+.alert-card.bearish {
+  border-left: 4px solid var(--red);
+  background: linear-gradient(90deg, rgba(255,82,82,0.08), var(--bg-card));
+}
+
+.alert-card.fading {
+  opacity: 0.5;
+}
+
+.alert-top {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 8px;
+}
+.alert-ticker {
+  font-size: 18px; font-weight: 900; letter-spacing: 0.04em;
+}
+.alert-type-badge {
+  font-size: 8px; font-weight: 700; letter-spacing: 0.08em;
+  padding: 3px 8px; border-radius: 4px;
+  text-transform: uppercase;
+}
+.alert-type-breakout { color: var(--accent); background: var(--accent-dim); border: 1px solid var(--border-accent); }
+.alert-type-level { color: var(--yellow); background: var(--yellow-bg); border: 1px solid var(--yellow-border); }
+.alert-type-fvg { color: #bb86fc; background: rgba(187,134,252,0.1); border: 1px solid rgba(187,134,252,0.25); }
+.alert-type-gap { color: #ff9800; background: rgba(255,152,0,0.1); border: 1px solid rgba(255,152,0,0.25); }
+
+.alert-details {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 6px;
+}
+.alert-entry {
+  font-size: 13px; font-weight: 600;
+}
+.alert-entry-label {
+  font-size: 10px; color: var(--text-dim); margin-right: 4px;
+}
+.alert-source {
+  font-size: 11px; color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.alert-footer {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-top: 8px;
+}
+.alert-time {
+  font-size: 10px; color: var(--text-dim);
+}
+.alert-prob {
+  font-size: 12px; font-weight: 800;
+  padding: 2px 8px; border-radius: 4px;
+}
+.alert-prob-high { color: var(--green); background: var(--green-bg); }
+.alert-prob-mid { color: var(--yellow); background: var(--yellow-bg); }
+.alert-prob-low { color: var(--text-secondary); background: rgba(255,255,255,0.04); }
+
+/* Alert countdown bar */
+.alert-countdown {
+  position: absolute;
+  bottom: 0; left: 0;
+  height: 2px;
+  background: var(--accent);
+  transition: width 1s linear;
+  opacity: 0.6;
+}
+
+/* ============================================================================
+   STOCK MANAGEMENT PAGE
+   ============================================================================ */
+.manage-page { display: none; padding: 28px; max-width: 800px; margin: 0 auto; }
+.manage-page.active { display: block; }
+
+.add-form {
+  display: flex; gap: 10px; margin-bottom: 24px;
+}
+.add-input {
+  flex: 1;
+  font-family: var(--font-mono);
+  font-size: 16px; font-weight: 700;
+  padding: 12px 18px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  outline: none;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.add-input::placeholder {
+  color: var(--text-muted);
+  text-transform: none;
+  letter-spacing: 0.02em;
+}
+.add-input:focus { border-color: var(--accent); box-shadow: 0 0 12px var(--accent-glow); }
+
+.add-btn {
+  font-family: var(--font-mono);
+  font-size: 13px; font-weight: 700; letter-spacing: 0.08em;
+  padding: 12px 28px;
+  border-radius: var(--radius);
+  border: none;
+  background: var(--accent);
+  color: var(--bg-primary);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.add-btn:hover { background: #6dd5fa; transform: translateY(-1px); }
+
+.watchlist-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 10px;
+}
+.watchlist-item {
+  display: flex; justify-content: space-between; align-items: center;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  transition: all 0.2s;
+}
+.watchlist-item:hover { border-color: var(--red-border); }
+
+.wl-ticker {
+  font-size: 16px; font-weight: 800; letter-spacing: 0.04em;
+}
+.remove-btn {
+  font-size: 18px; color: var(--text-dim);
+  background: none; border: none; cursor: pointer;
+  padding: 4px 8px; border-radius: 4px;
+  transition: all 0.15s;
+}
+.remove-btn:hover { color: var(--red); background: var(--red-bg); }
+
+/* ============================================================================
+   FOOTER
+   ============================================================================ */
+.footer {
+  padding: 10px 28px;
+  border-top: 1px solid var(--border);
+  display: flex; justify-content: space-between; align-items: center;
+  background: var(--bg-surface);
+}
+.footer-text { font-size: 10px; color: var(--text-muted); letter-spacing: 0.06em; }
+
+/* ============================================================================
+   EMPTY / LOADING STATES
+   ============================================================================ */
+.empty-state {
+  text-align: center; padding: 60px 20px;
+  color: var(--text-dim);
+}
+.empty-state .icon { font-size: 40px; margin-bottom: 12px; opacity: 0.3; }
+.empty-state .msg { font-size: 13px; }
+
+.loading { animation: pulse 1.5s ease-in-out infinite; }
+</style>
+</head>
+<body>
+
+<div id="app">
+  <!-- Header -->
+  <div class="header">
+    <div class="header-left">
+      <div id="statusDot" class="dead-dot"></div>
+      <div>
+        <div class="mono brand">BREAKOUTS</div>
+        <div class="mono brand-sub">BY CLAUDE & DEADSHOT</div>
+      </div>
+      <div class="nav">
+        <button class="nav-btn active" data-page="terminal" onclick="switchPage('terminal')">TERMINAL</button>
+        <button class="nav-btn" data-page="manage" onclick="switchPage('manage')">STOCKS</button>
+      </div>
+    </div>
+    <div class="header-right">
+      <span id="marketBadge" class="mono market-badge market-closed">CONNECTING...</span>
+      <div style="text-align:right">
+        <div id="clock" class="mono clock">--:--:--</div>
+        <div class="mono" style="font-size:10px;color:var(--text-muted)">
+          <span id="tickInfo">CONNECTING</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats Bar -->
+  <div class="stats-bar" id="statsBar">
+    <div class="stat">
+      <span class="mono stat-label">ALERTS</span>
+      <span id="alertCount" class="mono stat-value" style="color:var(--accent)">0</span>
+    </div>
+    <div class="divider"></div>
+    <div class="stat">
+      <span class="mono stat-label">BREAKOUTS</span>
+      <span id="breakoutCount" class="mono stat-value" style="color:var(--text-muted)">0</span>
+    </div>
+    <div class="divider"></div>
+    <div class="stat">
+      <span class="mono stat-label">TRENDING</span>
+      <span id="trendCount" class="mono stat-value" style="color:var(--text-dim)">0</span>
+    </div>
+    <div class="divider"></div>
+    <div class="stat">
+      <span class="mono stat-label">LEVELS</span>
+      <span id="totalLevelCount" class="mono stat-value" style="color:var(--text-secondary)">0</span>
+    </div>
+    <div class="divider"></div>
+    <div id="activeBreakouts" style="display:flex;gap:10px;align-items:center"></div>
+  </div>
+
+  <!-- ================================================================
+       TERMINAL PAGE — 2 Column Layout
+       ================================================================ -->
+  <div id="terminalPage" class="terminal-grid">
+    <!-- Column 1: Key Levels -->
+    <div class="column" id="keyLevelsColumn">
+      <div class="column-header">
+        <span class="mono">KEY LEVELS</span>
+        <span class="mono column-count" id="levelCount">0</span>
+      </div>
+      <div id="keyLevelsBody">
+        <div class="empty-state loading">
+          <div class="icon">&#9673;</div>
+          <div class="msg mono">Loading levels...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Column 2: Alerts -->
+    <div class="column" id="alertColumn">
+      <div class="column-header">
+        <span class="mono">ALERTS</span>
+        <span class="mono column-count" id="alertColCount">0</span>
+      </div>
+      <div id="alertBody">
+        <div class="empty-state loading">
+          <div class="icon">&#9888;</div>
+          <div class="msg mono">Watching for signals...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================================================================
+       STOCK MANAGEMENT PAGE
+       ================================================================ -->
+  <div id="managePage" class="manage-page">
+    <div class="column-header">
+      <span class="mono">MANAGE WATCHLIST</span>
+      <span class="mono column-count" id="wlCount">0</span>
+    </div>
+
+    <div class="add-form">
+      <input type="text" id="addTickerInput" class="add-input mono" placeholder="Enter ticker symbol (e.g. AAPL)" maxlength="10" />
+      <button class="add-btn mono" onclick="addTicker()">+ ADD</button>
+    </div>
+
+    <div id="watchlistGrid" class="watchlist-grid"></div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <span class="mono footer-text">ALPACA SIP DATA &bull; REAL-TIME &bull; SCALPBREAKOUTS.COM</span>
+    <span class="mono footer-text" id="lastUpdate">&mdash;</span>
+  </div>
+</div>
+
+<script>
+// ============================================================================
+// BREAKOUTS TERMINAL — Frontend v2
+// Streamlined levels + persistent alert system
+// ============================================================================
+
+const API_BASE = window.location.hostname === 'localhost'
+  ? 'http://localhost:3001'
+  : (window.API_BASE || 'https://breakouts-backend-production.up.railway.app');
+
+let tickCount = 0;
+let currentPage = 'terminal';
+let lastKeyLevelsHTML = '';
+let lastAlertsHTML = '';
+
+// ============================================================================
+// PAGE NAVIGATION
+// ============================================================================
+function switchPage(page) {
+  currentPage = page;
+  document.querySelectorAll('.nav-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.page === page);
+  });
+  document.getElementById('terminalPage').style.display = page === 'terminal' ? 'grid' : 'none';
+  document.getElementById('managePage').classList.toggle('active', page === 'manage');
+  document.getElementById('statsBar').style.display = page === 'terminal' ? 'flex' : 'none';
+
+  if (page === 'manage') loadWatchlist();
+}
+
+// ============================================================================
+// FETCH TERMINAL DATA
+// ============================================================================
+async function fetchTerminal() {
+  try {
+    const res = await fetch(`${API_BASE}/api/terminal`);
+    const data = await res.json();
+
+    tickCount++;
+    document.getElementById('statusDot').className = 'live-dot';
+
+    // Market status
+    const badge = document.getElementById('marketBadge');
+    if (data.marketOpen) {
+      badge.className = 'mono market-badge market-open';
+      badge.textContent = 'MARKET OPEN';
+    } else {
+      badge.className = 'mono market-badge market-closed';
+      badge.textContent = 'MARKET CLOSED';
+    }
+
+    document.getElementById('tickInfo').textContent =
+      `TICK #${tickCount} \u2022 ${data.watchlist.length} SYMBOLS \u2022 SIP LIVE`;
+
+    if (data.lastUpdate) {
+      document.getElementById('lastUpdate').textContent =
+        `LAST: ${new Date(data.lastUpdate).toLocaleTimeString()}`;
+    }
+
+    renderKeyLevels(data.keyLevels);
+    renderAlerts(data.alerts, data.breakouts);
+    updateStats(data);
+
+  } catch (err) {
+    document.getElementById('statusDot').className = 'dead-dot';
+    document.getElementById('marketBadge').textContent = 'DISCONNECTED';
+    document.getElementById('marketBadge').className = 'mono market-badge market-closed';
+    console.error('Fetch error:', err);
+  }
+}
+
+// ============================================================================
+// UPDATE STATS BAR
+// ============================================================================
+function updateStats(data) {
+  const alerts = data.alerts || [];
+  const breakouts = data.breakouts || [];
+
+  // Alert count
+  const alertCountEl = document.getElementById('alertCount');
+  alertCountEl.textContent = alerts.length;
+  alertCountEl.style.color = alerts.length > 0 ? 'var(--accent)' : 'var(--text-muted)';
+
+  // Breakout / trending counts
+  let breakoutCount = 0, trendCount = 0;
+  const activeBreakoutTickers = [];
+
+  breakouts.forEach(b => {
+    if (b.phase === 'BREAKOUT_UP' || b.phase === 'BREAKOUT_DOWN') {
+      breakoutCount++;
+      activeBreakoutTickers.push(b);
+    }
+    else if (b.phase === 'TRENDING_UP' || b.phase === 'TRENDING_DOWN') trendCount++;
+  });
+
+  const bcEl = document.getElementById('breakoutCount');
+  bcEl.textContent = breakoutCount;
+  bcEl.style.color = breakoutCount > 0 ? 'var(--green)' : 'var(--text-muted)';
+
+  document.getElementById('trendCount').textContent = trendCount;
+
+  // Total levels across all stocks
+  let totalLevels = 0;
+  (data.keyLevels || []).forEach(stock => {
+    totalLevels += (stock.levels || []).length;
+  });
+  document.getElementById('totalLevelCount').textContent = totalLevels;
+
+  // Active breakout tickers in stats bar
+  document.getElementById('activeBreakouts').innerHTML = activeBreakoutTickers.map(b => `
+    <span class="mono" style="font-size:12px;font-weight:800;color:${b.isBullish ? 'var(--green)' : 'var(--red)'};animation:pulse 1.5s ease-in-out infinite">
+      ${b.ticker} ${b.isBullish ? '&#9650;' : '&#9660;'}
+    </span>
+  `).join('');
+}
+
+// ============================================================================
+// RENDER: KEY LEVELS COLUMN
+// Groups levels by type: 2hr EQ, 1hr EQ, 1hr FVG, RTH Gap
+// ============================================================================
+function renderKeyLevels(keyLevels) {
+  const body = document.getElementById('keyLevelsBody');
+
+  // Filter: only show stocks that have levels
+  const filtered = (keyLevels || []).filter(stock =>
+    (stock.levels && stock.levels.length > 0)
+  );
+
+  document.getElementById('levelCount').textContent = filtered.length;
+
+  if (filtered.length === 0) {
+    const emptyHTML = '<div class="empty-state"><div class="icon" style="font-size:28px;opacity:0.2">&#9673;</div><div class="msg mono" style="font-size:12px">No active levels detected<br><span style="color:var(--text-muted);font-size:10px">Levels appear when 2hr/1hr EQ, FVG, or RTH Gap patterns are found</span></div></div>';
+    if (lastKeyLevelsHTML !== emptyHTML) {
+      body.innerHTML = emptyHTML;
+      lastKeyLevelsHTML = emptyHTML;
+    }
+    return;
+  }
+
+  const newHTML = filtered.map(stock => {
+    const sentimentClass = stock.sentiment === 'bullish' ? 'bullish' : 'bearish';
+    const priceClass = stock.changePct >= 0 ? 'price-up' : 'price-down';
+    const changeSign = stock.change >= 0 ? '+' : '';
+
+    // Group levels by source
+    const eq2hr = (stock.levels || []).filter(l => l.source === '2hr_equal');
+    const eq1hr = (stock.levels || []).filter(l => l.source === '1hr_equal');
+    const fvgLevels = (stock.levels || []).filter(l => l.source === 'fvg');
+    const gapLevels = (stock.levels || []).filter(l => l.source === 'rth_gap');
+
+    let levelsHTML = '';
+
+    // 2hr EQ Section
+    if (eq2hr.length > 0) {
+      levelsHTML += '<div class="level-section mono">2HR EQUAL LEVELS</div>';
+      levelsHTML += eq2hr.map(lvl => renderLevelRow(lvl)).join('');
+    }
+
+    // 1hr EQ Section
+    if (eq1hr.length > 0) {
+      levelsHTML += '<div class="level-section mono">1HR EQUAL LEVELS</div>';
+      levelsHTML += eq1hr.map(lvl => renderLevelRow(lvl)).join('');
+    }
+
+    // 1hr FVG Section
+    if (fvgLevels.length > 0) {
+      levelsHTML += '<div class="level-section mono">1HR FAIR VALUE GAPS</div>';
+      levelsHTML += fvgLevels.map(lvl => {
+        let row = renderLevelRow(lvl);
+        // Add FVG zone range below the CE row
+        if (lvl.fvgTop && lvl.fvgBottom) {
+          row += `<div class="fvg-zone mono">&nbsp;&nbsp;Zone: $${lvl.fvgBottom.toFixed(2)} &mdash; $${lvl.fvgTop.toFixed(2)}</div>`;
+        }
+        return row;
+      }).join('');
+    }
+
+    // RTH Gap Section
+    if (gapLevels.length > 0) {
+      levelsHTML += '<div class="level-section mono">RTH GAP</div>';
+      levelsHTML += gapLevels.map(lvl => {
+        let row = renderLevelRow(lvl);
+        if (lvl.gapTop && lvl.gapBottom) {
+          row += `<div class="fvg-zone mono">&nbsp;&nbsp;Gap: $${lvl.gapBottom.toFixed(2)} &mdash; $${lvl.gapTop.toFixed(2)}</div>`;
+        }
+        return row;
+      }).join('');
+    }
+
+    if (!levelsHTML) {
+      levelsHTML = '<div style="font-size:11px;color:var(--text-dim);padding:8px 0">Levels computing...</div>';
+    }
+
+    return `
+      <div class="stock-card ${sentimentClass}" data-ticker="${stock.ticker}">
+        <div class="card-top">
+          <div>
+            <span class="sentiment-pill ${sentimentClass}"></span>
+            <span class="mono ticker-name">${stock.ticker}</span>
+          </div>
+          <div class="card-price">
+            <div class="mono price-big ${priceClass}">$${stock.currentPrice.toFixed(2)}</div>
+            <div class="mono change-text" style="color:${stock.changePct >= 0 ? 'var(--green)' : 'var(--red)'}">
+              ${changeSign}${stock.change.toFixed(2)} (${stock.changePct.toFixed(2)}%)
+            </div>
+          </div>
+        </div>
+        ${levelsHTML}
+      </div>
+    `;
+  }).join('');
+
+  if (newHTML !== lastKeyLevelsHTML) {
+    body.innerHTML = newHTML;
+    lastKeyLevelsHTML = newHTML;
+  }
+}
+
+// Render a single level row with probability badge
+function renderLevelRow(lvl) {
+  const probClass = lvl.probability >= 75 ? 'prob-high-inline' : lvl.probability >= 55 ? 'prob-mid-inline' : 'prob-low-inline';
+
+  return `
+    <div class="level-row">
+      <span class="level-label">
+        ${lvl.label}
+        <span class="mono prob-inline ${probClass}">${lvl.probability}%</span>
+      </span>
+      <span class="mono level-price">$${lvl.price.toFixed(2)}</span>
+      <span class="mono level-distance" style="color:${lvl.sentiment === 'bullish' ? 'var(--green)' : 'var(--red)'}">
+        ${lvl.distance.toFixed(1)}%
+      </span>
+    </div>
+  `;
+}
+
+// ============================================================================
+// RENDER: ALERTS COLUMN
+// Persistent alert cards with timestamp, entry price, source, countdown
+// Newest alerts always at the top
+// ============================================================================
+function renderAlerts(alerts, breakouts) {
+  const body = document.getElementById('alertBody');
+
+  if (!alerts || alerts.length === 0) {
+    // Count phases for empty state message
+    let consolCount = 0;
+    if (breakouts) {
+      breakouts.forEach(b => {
+        if (b.phase === 'CONSOLIDATION' || b.phase === 'BUILDING_DATA') consolCount++;
+      });
+    }
+
+    const emptyHTML = `<div class="empty-state"><div class="icon" style="font-size:28px;opacity:0.2">&#9888;</div><div class="msg mono" style="font-size:12px">No active alerts<br><span style="color:var(--text-muted);font-size:10px">Alerts fire on breakouts, level hits, FVG touches, and RTH gap CE<br>${consolCount > 0 ? consolCount + ' stocks consolidating \u2014 watching for signals' : ''}</span></div></div>`;
+    if (lastAlertsHTML !== emptyHTML) {
+      body.innerHTML = emptyHTML;
+      lastAlertsHTML = emptyHTML;
+    }
+    document.getElementById('alertColCount').textContent = '0';
+    return;
+  }
+
+  document.getElementById('alertColCount').textContent = alerts.length;
+
+  const now = Date.now();
+
+  const newHTML = alerts.map(alert => {
+    const dirClass = alert.direction === 'bullish' ? 'bullish' : 'bearish';
+    const dirColor = alert.direction === 'bullish' ? 'var(--green)' : 'var(--red)';
+    const dirArrow = alert.direction === 'bullish' ? '&#9650;' : '&#9660;';
+
+    // Time remaining
+    const remaining = Math.max(0, alert.expiresAt - now);
+    const totalTTL = 5 * 60 * 1000;
+    const pctRemaining = (remaining / totalTTL) * 100;
+    const minutesLeft = Math.floor(remaining / 60000);
+    const secondsLeft = Math.floor((remaining % 60000) / 1000);
+    const timeLeftStr = `${minutesLeft}:${secondsLeft.toString().padStart(2, '0')}`;
+    const isFading = remaining < 60000; // last minute
+
+    // Alert type badge
+    let typeBadgeClass = 'alert-type-level';
+    let typeBadgeText = 'LEVEL HIT';
+    if (alert.type === 'breakout') { typeBadgeClass = 'alert-type-breakout'; typeBadgeText = 'BREAKOUT'; }
+    else if (alert.type === 'fvg_ce') { typeBadgeClass = 'alert-type-fvg'; typeBadgeText = 'FVG CE'; }
+    else if (alert.type === 'fvg_zone') { typeBadgeClass = 'alert-type-fvg'; typeBadgeText = 'FVG ZONE'; }
+    else if (alert.type === 'rth_gap') { typeBadgeClass = 'alert-type-gap'; typeBadgeText = 'RTH GAP'; }
+
+    // Probability badge
+    const probClass = alert.probability >= 75 ? 'alert-prob-high' : alert.probability >= 55 ? 'alert-prob-mid' : 'alert-prob-low';
+
+    // Timestamp
+    const alertTime = new Date(alert.timestamp).toLocaleTimeString('en-US', {
+      hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true
+    });
+
+    return `
+      <div class="alert-card ${dirClass} ${isFading ? 'fading' : ''}" data-alert-id="${alert.id}">
+        <div class="alert-top">
+          <div>
+            <span class="mono alert-ticker" style="color:${dirColor}">${dirArrow} ${alert.ticker}</span>
+          </div>
+          <span class="mono alert-type-badge ${typeBadgeClass}">${typeBadgeText}</span>
+        </div>
+        <div class="alert-details">
+          <div>
+            <span class="alert-entry-label mono">ENTRY</span>
+            <span class="mono alert-entry" style="color:${dirColor}">$${alert.entryPrice.toFixed(2)}</span>
+          </div>
+          <span class="alert-source">${alert.levelSource}</span>
+        </div>
+        <div class="alert-footer">
+          <span class="mono alert-time">${alertTime} &bull; ${timeLeftStr} left</span>
+          <span class="mono alert-prob ${probClass}">${alert.probability}%</span>
+        </div>
+        <div class="alert-countdown" style="width:${pctRemaining}%;background:${dirColor}"></div>
+      </div>
+    `;
+  }).join('');
+
+  // Always update alerts (countdown changes every tick)
+  body.innerHTML = newHTML;
+  lastAlertsHTML = newHTML;
+}
+
+// ============================================================================
+// WATCHLIST MANAGEMENT
+// ============================================================================
+async function loadWatchlist() {
+  try {
+    const res = await fetch(`${API_BASE}/api/watchlist`);
+    const data = await res.json();
+    renderWatchlist(data.watchlist);
+  } catch (err) {
+    console.error('Watchlist load error:', err);
+  }
+}
+
+function renderWatchlist(list) {
+  document.getElementById('wlCount').textContent = list.length;
+  document.getElementById('watchlistGrid').innerHTML = list.map(ticker => `
+    <div class="watchlist-item">
+      <span class="mono wl-ticker">${ticker}</span>
+      <button class="remove-btn" onclick="removeTicker('${ticker}')" title="Remove ${ticker}">&times;</button>
+    </div>
+  `).join('');
+}
+
+async function addTicker() {
+  const input = document.getElementById('addTickerInput');
+  const ticker = input.value.trim().toUpperCase();
+  if (!ticker) return;
+
+  try {
+    const res = await fetch(`${API_BASE}/api/watchlist/add`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ticker }),
+    });
+    const data = await res.json();
+    if (data.watchlist) renderWatchlist(data.watchlist);
+    input.value = '';
+  } catch (err) {
+    console.error('Add ticker error:', err);
+  }
+}
+
+async function removeTicker(ticker) {
+  try {
+    const res = await fetch(`${API_BASE}/api/watchlist/remove`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ticker }),
+    });
+    const data = await res.json();
+    if (data.watchlist) renderWatchlist(data.watchlist);
+  } catch (err) {
+    console.error('Remove ticker error:', err);
+  }
+}
+
+// Enter key to add ticker
+document.getElementById('addTickerInput').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') addTicker();
+});
+
+// ============================================================================
+// CLOCK
+// ============================================================================
+function updateClock() {
+  const now = new Date();
+  document.getElementById('clock').textContent =
+    now.toLocaleTimeString('en-US', { hour12: false, hour:'2-digit', minute:'2-digit', second:'2-digit' });
+}
+
+// ============================================================================
+// START
+// ============================================================================
+setInterval(updateClock, 1000);
+updateClock();
+
+// Fetch terminal data every 4 seconds
+fetchTerminal();
+setInterval(fetchTerminal, 4000);
+</script>
+</body>
+</html>
