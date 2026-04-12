@@ -662,8 +662,11 @@ body {
     </div>
 
     <div class="add-form">
-      <input type="text" id="addTickerInput" class="add-input mono" placeholder="Enter ticker symbol (e.g. AAPL)" maxlength="10" />
+      <input type="text" id="addTickerInput" class="add-input mono" placeholder="Ticker (AAPL) or futures (/ES, /NQ, /CL, /GC)" maxlength="10" />
       <button class="add-btn mono" onclick="addTicker()">+ ADD</button>
+    </div>
+    <div style="font-size:10px;color:var(--text-dim);padding:4px 12px;font-family:var(--font-mono)">
+      Stocks: AAPL, TSLA, etc. &bull; Futures: /ES, /NQ, /CL, /GC (or just ES, NQ, CL, GC)
     </div>
 
     <div id="watchlistGrid" class="watchlist-grid"></div>
@@ -868,14 +871,12 @@ function buildKeyLevelCard(stock) {
   const changeSign = stock.change >= 0 ? '+' : '';
   const curPrice = stock.currentPrice;
 
-  // Group levels by source
+  // Group levels by source (1hr EQ removed — only 2hr EQ now)
   let eq2hr = (stock.levels || []).filter(l => l.source === '2hr_equal');
-  let eq1hr = (stock.levels || []).filter(l => l.source === '1hr_equal');
   let fvgLevels = (stock.levels || []).filter(l => l.source === 'fvg');
   const gapLevels = (stock.levels || []).filter(l => l.source === 'rth_gap');
 
   eq2hr = eq2hr.sort((a, b) => Math.abs(a.price - curPrice) - Math.abs(b.price - curPrice)).slice(0, 4);
-  eq1hr = eq1hr.sort((a, b) => Math.abs(a.price - curPrice) - Math.abs(b.price - curPrice)).slice(0, 1);
 
   const bullFVGs = fvgLevels.filter(l => (l.label || '').includes('\u25B2') || l.type === 'support');
   const bearFVGs = fvgLevels.filter(l => (l.label || '').includes('\u25BC') || l.type === 'resistance');
@@ -888,9 +889,6 @@ function buildKeyLevelCard(stock) {
   if (eq2hr.length > 0) {
     levelsHTML += '<div class="level-section mono">2HR EQUAL LEVELS</div>';
     levelsHTML += eq2hr.map(lvl => renderLevelRow(lvl)).join('');
-  }
-  if (eq1hr.length > 0) {
-    levelsHTML += eq1hr.map(lvl => renderLevelRow(lvl)).join('');
   }
   if (fvgLevels.length > 0) {
     levelsHTML += '<div class="level-section mono">1HR FAIR VALUE GAPS</div>';
@@ -1055,8 +1053,10 @@ function buildAlertCard(alert, now) {
       </div>
       <div class="alert-details">
         <div>
-          <span class="alert-entry-label mono">ENTRY</span>
-          <span class="mono alert-entry" style="color:${dirColor}">$${alert.entryPrice.toFixed(2)}</span>
+          <span class="alert-entry-label mono">DIST TO LEVEL</span>
+          <span class="mono alert-entry" style="color:${dirColor}">
+            ${alert.distanceToLevel != null ? '$' + alert.distanceToLevel.toFixed(2) + ' (' + alert.distanceToLevelPct.toFixed(1) + '%)' : '$' + alert.entryPrice.toFixed(2)}
+          </span>
         </div>
         <span class="alert-source">${alert.levelSource}</span>
       </div>
@@ -1152,14 +1152,14 @@ function renderVectorSignals(signals) {
         <div class="vector-pattern">${patternName} &bull; ${sig.timeframe}</div>
         <div class="vector-detail">
           <div>
-            <span class="vector-level-label mono">LEVEL</span>
+            <span class="vector-level-label mono">DIST TO VECTOR</span>
             <span class="mono vector-level-price" style="color:${dirColor}">
-              ${sig.vectorLevel ? '$' + sig.vectorLevel.toFixed(2) : '—'}
+              ${sig.distanceToVector != null ? '$' + sig.distanceToVector.toFixed(2) + ' (' + sig.distanceToVectorPct.toFixed(1) + '%)' : '—'}
             </span>
           </div>
           <div style="text-align:right">
-            <span class="vector-level-label mono">ENTRY</span>
-            <span class="mono vector-level-price">$${sig.entryPrice ? sig.entryPrice.toFixed(2) : '—'}</span>
+            <span class="vector-level-label mono">${sig.timeframe}</span>
+            <span class="mono vector-level-price" style="color:var(--text-secondary)">${sig.priceAboveVector ? 'ABOVE' : 'BELOW'}</span>
           </div>
         </div>
         ${detail ? `<div class="mono" style="font-size:10px;color:var(--text-dim);margin-top:4px">${detail}</div>` : ''}
@@ -1184,12 +1184,15 @@ async function loadWatchlist() {
 
 function renderWatchlist(list) {
   document.getElementById('wlCount').textContent = list.length;
-  document.getElementById('watchlistGrid').innerHTML = list.map(ticker => `
+  document.getElementById('watchlistGrid').innerHTML = list.map(ticker => {
+    const isFutures = ticker.startsWith('/');
+    return `
     <div class="watchlist-item">
-      <span class="mono wl-ticker">${ticker}</span>
-      <button class="remove-btn" onclick="removeTicker('${ticker}')" title="Remove ${ticker}">&times;</button>
+      <span class="mono wl-ticker">${ticker}${isFutures ? ' <span style="font-size:9px;color:var(--yellow);opacity:0.7">FUT</span>' : ''}</span>
+      <button class="remove-btn" onclick="removeTicker(\`${ticker}\`)" title="Remove ${ticker}">&times;</button>
     </div>
-  `).join('');
+    `;
+  }).join('');
 }
 
 async function addTicker() {
