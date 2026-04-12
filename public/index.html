@@ -1152,9 +1152,9 @@ function renderVectorSignals(signals) {
         <div class="vector-pattern">${patternName} &bull; ${sig.timeframe}</div>
         <div class="vector-detail">
           <div>
-            <span class="vector-level-label mono">DIST TO VECTOR</span>
+            <span class="vector-level-label mono">PRICE</span>
             <span class="mono vector-level-price" style="color:${dirColor}">
-              ${sig.distanceToVector != null ? '$' + sig.distanceToVector.toFixed(2) + ' (' + sig.distanceToVectorPct.toFixed(1) + '%)' : '—'}
+              $${sig.entryPrice != null ? sig.entryPrice.toFixed(2) : '—'}
             </span>
           </div>
           <div style="text-align:right">
