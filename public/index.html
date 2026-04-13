@@ -1117,6 +1117,7 @@ function renderVectorSignals(signals) {
       side_exit_forming: 'Reversal Setup (Forming)',
       table_top: 'Continuation Setup',
       table_top_forming: 'Continuation Setup (Forming)',
+      dual_confirm: 'Dual Confirmation',
       level_sr: 'S/R Level Hit',
       sweep_high_fib: 'TFR Setup',
       sweep_low_fib: 'TFR Setup',
@@ -1128,7 +1129,8 @@ function renderVectorSignals(signals) {
     // Extra detail
     let detail = '';
     if (sig.barsHugging) detail = `${sig.barsHugging} bars hugging`;
-    if (sig.flatBars) detail = `${sig.flatBars} flat bars`;
+    if (sig.flatBars) detail = `${sig.flatBars} flat bars, single tap`;
+    if (sig.dualConfirmation) detail = 'Side-exit + Table-top confirmed';
     if (sig.fibData) detail = `.618: $${sig.fibData.fib618.toFixed(2)}`;
     if (sig.components) {
       const parts = [];
@@ -1137,6 +1139,12 @@ function renderVectorSignals(signals) {
       if (sig.components.resistance) parts.push(`${sig.components.resistance} resistance`);
       if (sig.components.fibConfirm) parts.push('.618 ✓');
       detail = parts.join(' + ');
+    }
+    // Vector adjustment status — the key confirmation signal
+    if (sig.vectorAdjustedUp) {
+      detail += (detail ? ' · ' : '') + 'Vector ↑ Primed';
+    } else if (sig.detail === 'Waiting for vector adjustment') {
+      detail += (detail ? ' · ' : '') + 'Awaiting Vector ↑';
     }
 
     const time = new Date(sig.timestamp).toLocaleTimeString('en-US', {
