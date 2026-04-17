@@ -49,6 +49,13 @@
 
   --radius: 10px;
   --radius-sm: 6px;
+
+  /* Bot Page Instrument Colors */
+  --mnq: #4fc3f7;
+  --mes: #ffa726;
+  --mcl: #ab47bc;
+  --mgc: #ffd700;
+  --mbt: #ff7043;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -379,10 +386,6 @@ body {
 }
 
 /* ============================================================================
-   STOCK MANAGEMENT PAGE
-   ============================================================================ */
-
-/* ============================================================================
    VECTOR SIGNAL CARDS — (Column 3)
    ============================================================================ */
 .vector-card {
@@ -458,7 +461,9 @@ body {
   font-size: 10px; color: var(--text-muted); margin-top: 6px;
 }
 
-/* STOCK MANAGEMENT PAGE */
+/* ============================================================================
+   STOCK MANAGEMENT PAGE
+   ============================================================================ */
 .manage-page { display: none; padding: 28px; max-width: 800px; margin: 0 auto; }
 .manage-page.active { display: block; }
 
@@ -525,6 +530,429 @@ body {
 .remove-btn:hover { color: var(--red); background: var(--red-bg); }
 
 /* ============================================================================
+   BOT PAGE
+   ============================================================================ */
+.bot-page { display: none; padding: 28px; min-height: calc(100vh - 140px); overflow-y: auto; }
+.bot-page.active { display: block; }
+
+.bot-controls {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 32px;
+  align-items: start;
+}
+
+.control-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.start-stop-btn {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  border: none;
+  font-family: var(--font-mono);
+  font-size: 16px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  letter-spacing: 0.06em;
+}
+
+.start-stop-btn.running {
+  background: var(--green);
+  color: var(--bg-primary);
+  box-shadow: 0 0 20px var(--green-glow);
+}
+
+.start-stop-btn.running:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 30px var(--green-glow);
+}
+
+.start-stop-btn.stopped {
+  background: var(--red);
+  color: white;
+  box-shadow: 0 0 20px var(--red-glow);
+}
+
+.start-stop-btn.stopped:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 30px var(--red-glow);
+}
+
+.bot-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.bot-status-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.bot-status-dot.live {
+  background: var(--green);
+  box-shadow: 0 0 12px var(--green-glow);
+}
+
+.bot-status-dot.offline {
+  background: var(--red);
+  box-shadow: 0 0 12px var(--red-glow);
+}
+
+.status-label {
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  margin-bottom: 6px;
+}
+
+.uptime-text {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+/* Contract toggles */
+.contract-toggles {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+}
+
+.contract-pill {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  padding: 12px 20px;
+  border-radius: 20px;
+  border: 2px solid;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.3s;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.contract-pill.mnq { color: var(--mnq); border-color: var(--mnq); }
+.contract-pill.mnq.enabled { background: var(--mnq); color: var(--bg-primary); }
+
+.contract-pill.mes { color: var(--mes); border-color: var(--mes); }
+.contract-pill.mes.enabled { background: var(--mes); color: var(--bg-primary); }
+
+.contract-pill.mcl { color: var(--mcl); border-color: var(--mcl); }
+.contract-pill.mcl.enabled { background: var(--mcl); color: var(--bg-primary); }
+
+.contract-pill.mgc { color: var(--mgc); border-color: var(--mgc); }
+.contract-pill.mgc.enabled { background: var(--mgc); color: var(--bg-primary); }
+
+.contract-pill.mbt { color: var(--mbt); border-color: var(--mbt); }
+.contract-pill.mbt.enabled { background: var(--mbt); color: var(--bg-primary); }
+
+.contract-pill:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255,255,255,0.1);
+}
+
+/* P&L Section */
+.pnl-section {
+  margin-bottom: 32px;
+}
+
+.section-header {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--text-dim);
+  margin-bottom: 16px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.grand-pnl {
+  font-size: 48px;
+  font-weight: 900;
+  margin-bottom: 16px;
+  letter-spacing: 0.02em;
+}
+
+.grand-pnl.positive { color: var(--green); }
+.grand-pnl.negative { color: var(--red); }
+
+.account-pnl-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 12px;
+}
+
+.account-pnl-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+}
+
+.account-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.leader-badge {
+  font-size: 9px;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: rgba(255,215,0,0.15);
+  color: var(--mgc);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.account-pnl {
+  font-size: 20px;
+  font-weight: 800;
+  margin-bottom: 10px;
+}
+
+.account-pnl.positive { color: var(--green); }
+.account-pnl.negative { color: var(--red); }
+
+.account-cap-label {
+  font-size: 10px;
+  color: var(--text-dim);
+  margin-bottom: 4px;
+}
+
+.cap-progress-bar {
+  height: 6px;
+  background: var(--bg-secondary);
+  border-radius: 3px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.cap-progress-fill {
+  height: 100%;
+  background: var(--green);
+  border-radius: 3px;
+  transition: width 0.3s;
+}
+
+.cap-progress-fill.warning { background: var(--yellow); }
+.cap-progress-fill.danger { background: var(--red); }
+
+/* Instruments & Vectors */
+.instruments-section {
+  margin-bottom: 32px;
+}
+
+.instruments-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.instrument-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+}
+
+.instrument-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.instrument-name {
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+}
+
+.instrument-price {
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.vector-row {
+  font-size: 11px;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  padding: 4px 0;
+}
+
+.vector-label {
+  color: var(--text-dim);
+}
+
+.vector-value {
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.vector-value.bullish { color: var(--green); }
+.vector-value.bearish { color: var(--red); }
+
+.primed-badge {
+  font-size: 8px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 3px;
+  background: var(--green-bg);
+  color: var(--green);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-top: 6px;
+  display: inline-block;
+}
+
+/* Active Positions */
+.positions-section {
+  margin-bottom: 32px;
+}
+
+.positions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 12px;
+}
+
+.position-card {
+  background: var(--bg-card);
+  border: 2px solid var(--green);
+  border-radius: var(--radius);
+  padding: 16px;
+}
+
+.position-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.position-info {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.position-mode {
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 3px;
+  background: var(--accent-dim);
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 700;
+}
+
+.position-detail {
+  font-size: 11px;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  padding: 4px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+}
+
+.position-detail:last-child { border-bottom: none; }
+
+.position-label {
+  color: var(--text-dim);
+}
+
+.position-value {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.be-status {
+  font-size: 10px;
+  color: var(--green);
+  font-weight: 700;
+  margin-top: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* Trade History Table */
+.trades-section {
+  margin-bottom: 32px;
+}
+
+.trades-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.trades-table th {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  text-align: left;
+  padding: 12px 10px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-dim);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.trades-table td {
+  padding: 12px 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+  font-family: var(--font-mono);
+}
+
+.trades-table tr.win { background: rgba(0,230,118,0.08); }
+.trades-table tr.loss { background: rgba(255,82,82,0.08); }
+
+.trades-table tr:hover { background: rgba(255,255,255,0.04); }
+
+.pnl-positive { color: var(--green); font-weight: 700; }
+.pnl-negative { color: var(--red); font-weight: 700; }
+
+.empty-state {
+  text-align: center; padding: 60px 20px;
+  color: var(--text-dim);
+}
+.empty-state .icon { font-size: 40px; margin-bottom: 12px; opacity: 0.3; }
+.empty-state .msg { font-size: 13px; }
+
+.loading { animation: pulse 1.5s ease-in-out infinite; }
+
+/* ============================================================================
    FOOTER
    ============================================================================ */
 .footer {
@@ -538,14 +966,6 @@ body {
 /* ============================================================================
    EMPTY / LOADING STATES
    ============================================================================ */
-.empty-state {
-  text-align: center; padding: 60px 20px;
-  color: var(--text-dim);
-}
-.empty-state .icon { font-size: 40px; margin-bottom: 12px; opacity: 0.3; }
-.empty-state .msg { font-size: 13px; }
-
-.loading { animation: pulse 1.5s ease-in-out infinite; }
 </style>
 </head>
 <body>
@@ -561,7 +981,8 @@ body {
       </div>
       <div class="nav">
         <button class="nav-btn active" data-page="terminal" onclick="switchPage('terminal')">TERMINAL</button>
-        <button class="nav-btn" data-page="manage" onclick="switchPage('manage')">STOCKS</button>
+        <button class="nav-btn" data-page="stocks" onclick="switchPage('stocks')">STOCKS</button>
+        <button class="nav-btn" data-page="bot" onclick="switchPage('bot')">BOT</button>
       </div>
     </div>
     <div class="header-right">
@@ -606,7 +1027,7 @@ body {
   </div>
 
   <!-- ================================================================
-       TERMINAL PAGE — 2 Column Layout
+       TERMINAL PAGE — 3 Column Layout
        ================================================================ -->
   <div id="terminalPage" class="terminal-grid">
     <!-- Column 1: Key Levels -->
@@ -653,9 +1074,9 @@ body {
   </div>
 
   <!-- ================================================================
-       STOCK MANAGEMENT PAGE
+       STOCKS MANAGEMENT PAGE
        ================================================================ -->
-  <div id="managePage" class="manage-page">
+  <div id="stocksPage" class="manage-page">
     <div class="column-header">
       <span class="mono">MANAGE WATCHLIST</span>
       <span class="mono column-count" id="wlCount">0</span>
@@ -672,6 +1093,99 @@ body {
     <div id="watchlistGrid" class="watchlist-grid"></div>
   </div>
 
+  <!-- ================================================================
+       BOT PAGE
+       ================================================================ -->
+  <div id="botPage" class="bot-page">
+    <!-- Controls Section -->
+    <div class="bot-controls">
+      <!-- Start/Stop -->
+      <div class="control-card" style="justify-content: center;">
+        <button id="startStopBtn" class="start-stop-btn stopped" onclick="toggleBot()">START</button>
+      </div>
+      <!-- Status -->
+      <div class="control-card">
+        <div class="status-label mono">BOT STATUS</div>
+        <div class="bot-status">
+          <div id="botStatusDot" class="bot-status-dot offline"></div>
+          <span id="botStatusText" class="mono">OFFLINE</span>
+        </div>
+        <div class="uptime-text mono" id="botUptimeText">—</div>
+      </div>
+      <!-- Uptime Display -->
+      <div class="control-card">
+        <div class="status-label mono">UPTIME</div>
+        <div class="mono" id="botUptimeDisplay" style="font-size: 18px; font-weight: 800; color: var(--accent);">0h 0m 0s</div>
+      </div>
+    </div>
+
+    <!-- Contract Toggles -->
+    <div class="section-header">
+      <span class="mono">ENABLED CONTRACTS</span>
+    </div>
+    <div class="contract-toggles" id="contractToggles">
+      <button class="contract-pill mnq" data-contract="MNQ" onclick="toggleContract('MNQ')">MNQ</button>
+      <button class="contract-pill mes" data-contract="MES" onclick="toggleContract('MES')">MES</button>
+      <button class="contract-pill mcl" data-contract="MCL" onclick="toggleContract('MCL')">MCL</button>
+      <button class="contract-pill mgc" data-contract="MGC" onclick="toggleContract('MGC')">MGC</button>
+      <button class="contract-pill mbt" data-contract="MBT" onclick="toggleContract('MBT')">MBT</button>
+    </div>
+
+    <!-- P&L Section -->
+    <div class="pnl-section">
+      <div class="section-header">
+        <span class="mono">P&L SUMMARY</span>
+      </div>
+      <div id="grandPnlDisplay" class="grand-pnl positive">+ $0.00</div>
+      <div class="account-pnl-grid" id="accountPnlGrid">
+        <!-- Account P&L cards rendered here -->
+      </div>
+    </div>
+
+    <!-- Instruments & Vectors -->
+    <div class="instruments-section">
+      <div class="section-header">
+        <span class="mono">INSTRUMENTS & VECTORS</span>
+      </div>
+      <div class="instruments-grid" id="instrumentsGrid">
+        <!-- Instrument cards rendered here -->
+      </div>
+    </div>
+
+    <!-- Active Positions -->
+    <div class="positions-section">
+      <div class="section-header">
+        <span class="mono">ACTIVE POSITIONS</span>
+      </div>
+      <div class="positions-grid" id="positionsGrid">
+        <!-- Position cards rendered here -->
+      </div>
+    </div>
+
+    <!-- Trade History -->
+    <div class="trades-section">
+      <div class="section-header">
+        <span class="mono">TRADE HISTORY</span>
+      </div>
+      <table class="trades-table">
+        <thead>
+          <tr>
+            <th>Account</th>
+            <th>Instrument</th>
+            <th>Mode</th>
+            <th>Entry</th>
+            <th>Exit Reason</th>
+            <th>P&L</th>
+            <th>Time</th>
+          </tr>
+        </thead>
+        <tbody id="tradesTableBody">
+          <!-- Trade history rows rendered here -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
   <!-- Footer -->
   <div class="footer">
     <span class="mono footer-text">ALPACA SIP DATA &bull; REAL-TIME &bull; SCALPBREAKOUTS.COM</span>
@@ -681,8 +1195,7 @@ body {
 
 <script>
 // ============================================================================
-// BREAKOUTS TERMINAL — Frontend v2
-// Streamlined levels + persistent alert system
+// BREAKOUTS TERMINAL — Frontend v2 with BOT page
 // ============================================================================
 
 const API_BASE = window.location.hostname === 'localhost'
@@ -693,7 +1206,8 @@ let tickCount = 0;
 let currentPage = 'terminal';
 let lastKeyLevelsJSON = '';
 let lastAlertsJSON = '';
-let currentAlerts = [];  // live alert data for countdown updates
+let currentAlerts = [];
+let botStartTime = null;
 
 // ============================================================================
 // PAGE NAVIGATION
@@ -704,10 +1218,257 @@ function switchPage(page) {
     btn.classList.toggle('active', btn.dataset.page === page);
   });
   document.getElementById('terminalPage').style.display = page === 'terminal' ? 'grid' : 'none';
-  document.getElementById('managePage').classList.toggle('active', page === 'manage');
+  document.getElementById('stocksPage').classList.toggle('active', page === 'stocks');
+  document.getElementById('botPage').classList.toggle('active', page === 'bot');
   document.getElementById('statsBar').style.display = page === 'terminal' ? 'flex' : 'none';
 
-  if (page === 'manage') loadWatchlist();
+  if (page === 'stocks') loadWatchlist();
+  if (page === 'bot') startBotPolling();
+}
+
+// ============================================================================
+// BOT PAGE POLLING
+// ============================================================================
+let botPollingInterval = null;
+
+function startBotPolling() {
+  if (botPollingInterval) clearInterval(botPollingInterval);
+  fetchBotState();
+  botPollingInterval = setInterval(fetchBotState, 3000);
+}
+
+async function fetchBotState() {
+  try {
+    const res = await fetch(`${API_BASE}/api/bot/state`);
+    const state = await res.json();
+    renderBotPage(state);
+  } catch (err) {
+    console.error('Bot state fetch error:', err);
+  }
+}
+
+function renderBotPage(state) {
+  // Update status
+  const isRunning = state.bot_status === 'running';
+  const startStopBtn = document.getElementById('startStopBtn');
+  const botStatusDot = document.getElementById('botStatusDot');
+  const botStatusText = document.getElementById('botStatusText');
+
+  startStopBtn.classList.toggle('running', isRunning);
+  startStopBtn.classList.toggle('stopped', !isRunning);
+  startStopBtn.textContent = isRunning ? 'STOP' : 'START';
+
+  botStatusDot.classList.toggle('live', isRunning);
+  botStatusDot.classList.toggle('offline', !isRunning);
+  botStatusText.textContent = isRunning ? 'LIVE' : 'OFFLINE';
+
+  // Update uptime
+  if (isRunning && state.started_at) {
+    botStartTime = new Date(state.started_at).getTime();
+    updateBotUptime();
+  } else {
+    botStartTime = null;
+    document.getElementById('botUptimeDisplay').textContent = '0h 0m 0s';
+  }
+
+  // Update contract toggles
+  const enabledContracts = state.enabled_contracts || [];
+  document.querySelectorAll('.contract-pill').forEach(pill => {
+    const contract = pill.dataset.contract;
+    pill.classList.toggle('enabled', enabledContracts.includes(contract));
+  });
+
+  // Update P&L
+  let grandTotal = 0;
+  const accounts = state.accounts || {};
+  let leader = null;
+  let leaderPnl = -Infinity;
+
+  Object.values(accounts).forEach(acc => {
+    const pnl = acc.total_pnl || 0;
+    grandTotal += pnl;
+    if (pnl > leaderPnl) {
+      leaderPnl = pnl;
+      leader = acc.name;
+    }
+  });
+
+  const grandPnlEl = document.getElementById('grandPnlDisplay');
+  grandPnlEl.className = 'grand-pnl ' + (grandTotal >= 0 ? 'positive' : 'negative');
+  const sign = grandTotal >= 0 ? '+' : '';
+  grandPnlEl.textContent = `${sign} $${Math.abs(grandTotal).toFixed(2)}`;
+
+  // Render account P&L cards
+  const accountGrid = document.getElementById('accountPnlGrid');
+  accountGrid.innerHTML = Object.values(accounts).map(acc => {
+    const pnl = acc.total_pnl || 0;
+    const capUsed = Math.abs(pnl);
+    const capPercent = Math.min(100, (capUsed / 1200) * 100);
+    const isLeader = acc.name === leader;
+
+    return `
+      <div class="account-pnl-card">
+        <div class="account-name">
+          <span>${acc.name}</span>
+          ${isLeader ? '<span class="leader-badge">LEADER</span>' : ''}
+        </div>
+        <div class="account-pnl ${pnl >= 0 ? 'positive' : 'negative'}">
+          ${pnl >= 0 ? '+' : ''} $${Math.abs(pnl).toFixed(2)}
+        </div>
+        <div class="account-cap-label mono">Daily Cap: $${capUsed.toFixed(2)} / $1,200</div>
+        <div class="cap-progress-bar">
+          <div class="cap-progress-fill ${capPercent >= 100 ? 'danger' : capPercent >= 80 ? 'warning' : ''}" style="width: ${capPercent}%"></div>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  // Render instruments
+  const instruments = state.instruments || {};
+  const instrumentsGrid = document.getElementById('instrumentsGrid');
+  instrumentsGrid.innerHTML = Object.entries(instruments).map(([name, data]) => {
+    const instrumentClass = name.toLowerCase();
+    const vec1m = data.vec_1m || 0;
+    const vec5m = data.vec_5m || 0;
+    const vec15m = data.vec_15m || 0;
+
+    return `
+      <div class="instrument-card">
+        <div class="instrument-header">
+          <span class="instrument-name mono" style="color: var(--${instrumentClass})">${name}</span>
+          <span class="instrument-price mono">${data.last_price ? '$' + data.last_price.toFixed(2) : '—'}</span>
+        </div>
+        <div class="vector-row">
+          <span class="vector-label mono">1M:</span>
+          <span class="vector-value ${vec1m > 0 ? 'bullish' : vec1m < 0 ? 'bearish' : ''} mono">${vec1m.toFixed(2)}</span>
+        </div>
+        <div class="vector-row">
+          <span class="vector-label mono">5M:</span>
+          <span class="vector-value ${vec5m > 0 ? 'bullish' : vec5m < 0 ? 'bearish' : ''} mono">${vec5m.toFixed(2)}</span>
+        </div>
+        <div class="vector-row">
+          <span class="vector-label mono">15M:</span>
+          <span class="vector-value ${vec15m > 0 ? 'bullish' : vec15m < 0 ? 'bearish' : ''} mono">${vec15m.toFixed(2)}</span>
+        </div>
+        ${data.primed ? '<span class="primed-badge mono">Primed</span>' : ''}
+      </div>
+    `;
+  }).join('');
+
+  // Render active positions
+  let allPositions = [];
+  Object.values(accounts).forEach(acc => {
+    (acc.positions || []).forEach(pos => {
+      allPositions.push({ ...pos, accountName: acc.name });
+    });
+  });
+
+  const positionsGrid = document.getElementById('positionsGrid');
+  if (allPositions.length === 0) {
+    positionsGrid.innerHTML = '<div class="empty-state"><div class="icon">—</div><div class="msg mono">No open positions</div></div>';
+  } else {
+    positionsGrid.innerHTML = allPositions.map(pos => {
+      return `
+        <div class="position-card">
+          <div class="position-header">
+            <span class="position-info mono">${pos.accountName} · ${pos.instrument}</span>
+            <span class="position-mode">${pos.mode}</span>
+          </div>
+          <div class="position-detail">
+            <span class="position-label mono">Entry</span>
+            <span class="position-value mono">$${pos.entry ? pos.entry.toFixed(2) : '—'}</span>
+          </div>
+          <div class="position-detail">
+            <span class="position-label mono">Stop Loss</span>
+            <span class="position-value mono">$${pos.sl ? pos.sl.toFixed(2) : '—'}</span>
+          </div>
+          <div class="position-detail">
+            <span class="position-label mono">TP1</span>
+            <span class="position-value mono">$${pos.tp1 ? pos.tp1.toFixed(2) : '—'}</span>
+          </div>
+          <div class="position-detail">
+            <span class="position-label mono">TP2</span>
+            <span class="position-value mono">$${pos.tp2 ? pos.tp2.toFixed(2) : '—'}</span>
+          </div>
+          ${pos.be ? '<div class="be-status mono">Break Even Hit</div>' : ''}
+        </div>
+      `;
+    }).join('');
+  }
+
+  // Render trade history
+  let allTrades = [];
+  Object.values(accounts).forEach(acc => {
+    (acc.trades || []).forEach(trade => {
+      allTrades.push({ ...trade, accountName: acc.name });
+    });
+  });
+
+  allTrades = allTrades.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)).slice(0, 50);
+
+  const tradesBody = document.getElementById('tradesTableBody');
+  if (allTrades.length === 0) {
+    tradesBody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--text-dim); padding: 20px;">No trades yet</td></tr>';
+  } else {
+    tradesBody.innerHTML = allTrades.map(trade => {
+      const pnl = trade.pnl || 0;
+      const isWin = pnl > 0;
+      const time = new Date(trade.timestamp).toLocaleTimeString('en-US', {
+        hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true
+      });
+
+      return `
+        <tr class="${isWin ? 'win' : 'loss'}">
+          <td class="mono">${trade.accountName}</td>
+          <td class="mono">${trade.instrument}</td>
+          <td class="mono">${trade.mode}</td>
+          <td class="mono">$${trade.entry ? trade.entry.toFixed(2) : '—'}</td>
+          <td class="mono">${trade.exit_reason || '—'}</td>
+          <td class="mono ${isWin ? 'pnl-positive' : 'pnl-negative'}">${isWin ? '+' : ''}$${Math.abs(pnl).toFixed(2)}</td>
+          <td class="mono">${time}</td>
+        </tr>
+      `;
+    }).join('');
+  }
+}
+
+function updateBotUptime() {
+  if (!botStartTime) return;
+  const now = Date.now();
+  const elapsed = now - botStartTime;
+  const hours = Math.floor(elapsed / 3600000);
+  const minutes = Math.floor((elapsed % 3600000) / 60000);
+  const seconds = Math.floor((elapsed % 60000) / 1000);
+  document.getElementById('botUptimeDisplay').textContent = `${hours}h ${minutes}m ${seconds}s`;
+}
+
+// Update uptime every second
+setInterval(() => {
+  if (botStartTime) updateBotUptime();
+}, 1000);
+
+async function toggleBot() {
+  const isRunning = document.getElementById('startStopBtn').classList.contains('running');
+  const endpoint = isRunning ? 'stop' : 'start';
+  try {
+    await fetch(`${API_BASE}/api/bot/${endpoint}`, { method: 'POST' });
+    fetchBotState();
+  } catch (err) {
+    console.error('Bot toggle error:', err);
+  }
+}
+
+async function toggleContract(contract) {
+  try {
+    await fetch(`${API_BASE}/api/bot/toggle`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ contract }),
+    });
+    fetchBotState();
+  } catch (err) {
+    console.error('Contract toggle error:', err);
+  }
 }
 
 // ============================================================================
@@ -721,7 +1482,6 @@ async function fetchTerminal() {
     tickCount++;
     document.getElementById('statusDot').className = 'live-dot';
 
-    // Market status
     const badge = document.getElementById('marketBadge');
     if (data.marketOpen) {
       badge.className = 'mono market-badge market-open';
@@ -759,12 +1519,10 @@ function updateStats(data) {
   const alerts = data.alerts || [];
   const breakouts = data.breakouts || [];
 
-  // Alert count
   const alertCountEl = document.getElementById('alertCount');
   alertCountEl.textContent = alerts.length;
   alertCountEl.style.color = alerts.length > 0 ? 'var(--accent)' : 'var(--text-muted)';
 
-  // Breakout / trending counts
   let breakoutCount = 0, trendCount = 0;
   const activeBreakoutTickers = [];
 
@@ -782,21 +1540,18 @@ function updateStats(data) {
 
   document.getElementById('trendCount').textContent = trendCount;
 
-  // Total levels across all stocks
   let totalLevels = 0;
   (data.keyLevels || []).forEach(stock => {
     totalLevels += (stock.levels || []).length;
   });
   document.getElementById('totalLevelCount').textContent = totalLevels;
 
-  // Vector signals count
   const vectorSignals = data.vectorSignals || [];
   const confirmedVectors = vectorSignals.filter(s => s.tier !== 'forming');
   const vcEl = document.getElementById('vectorCount');
   vcEl.textContent = confirmedVectors.length;
   vcEl.style.color = confirmedVectors.length > 0 ? 'var(--yellow)' : 'var(--text-muted)';
 
-  // Active breakout tickers in stats bar
   document.getElementById('activeBreakouts').innerHTML = activeBreakoutTickers.map(b => `
     <span class="mono" style="font-size:12px;font-weight:800;color:${b.isBullish ? 'var(--green)' : 'var(--red)'};animation:pulse 1.5s ease-in-out infinite">
       ${b.ticker} ${b.isBullish ? '&#9650;' : '&#9660;'}
@@ -806,13 +1561,10 @@ function updateStats(data) {
 
 // ============================================================================
 // RENDER: KEY LEVELS COLUMN
-// Groups levels by type: 2hr EQ, 1hr EQ, 1hr FVG, RTH Gap
-// In-place price updates to prevent flashing on every tick
 // ============================================================================
 function renderKeyLevels(keyLevels) {
   const body = document.getElementById('keyLevelsBody');
 
-  // Filter: only show stocks that have levels
   const filtered = (keyLevels || []).filter(stock =>
     (stock.levels && stock.levels.length > 0)
   );
@@ -828,7 +1580,6 @@ function renderKeyLevels(keyLevels) {
   }
   body.dataset.state = 'active';
 
-  // Structural fingerprint — only tickers + level prices/sources (NOT current price)
   const structFingerprint = JSON.stringify(filtered.map(s => ({
     t: s.ticker,
     l: (s.levels || []).map(l => l.price + ':' + l.source)
@@ -837,12 +1588,10 @@ function renderKeyLevels(keyLevels) {
   const structChanged = structFingerprint !== lastKeyLevelsJSON;
 
   if (structChanged) {
-    // Full rebuild only when tickers or levels change
     lastKeyLevelsJSON = structFingerprint;
     body.innerHTML = filtered.map(stock => buildKeyLevelCard(stock)).join('');
   }
 
-  // Always do in-place price updates (no flicker)
   filtered.forEach(stock => {
     const card = body.querySelector(`[data-ticker="${stock.ticker}"]`);
     if (!card) return;
@@ -859,7 +1608,6 @@ function renderKeyLevels(keyLevels) {
       changeEl.style.color = stock.changePct >= 0 ? 'var(--green)' : 'var(--red)';
     }
 
-    // Update sentiment border
     const sentClass = stock.sentiment === 'bullish' ? 'bullish' : 'bearish';
     card.className = `stock-card ${sentClass}`;
   });
@@ -871,7 +1619,6 @@ function buildKeyLevelCard(stock) {
   const changeSign = stock.change >= 0 ? '+' : '';
   const curPrice = stock.currentPrice;
 
-  // Group levels by source (1hr EQ removed — only 2hr EQ now)
   let eq2hr = (stock.levels || []).filter(l => l.source === '2hr_equal');
   let fvgLevels = (stock.levels || []).filter(l => l.source === 'fvg');
   const gapLevels = (stock.levels || []).filter(l => l.source === 'rth_gap');
@@ -934,7 +1681,6 @@ function buildKeyLevelCard(stock) {
   `;
 }
 
-// Render a single level row with probability badge
 function renderLevelRow(lvl) {
   const probClass = lvl.probability >= 75 ? 'prob-high-inline' : lvl.probability >= 55 ? 'prob-mid-inline' : 'prob-low-inline';
 
@@ -954,8 +1700,6 @@ function renderLevelRow(lvl) {
 
 // ============================================================================
 // RENDER: ALERTS COLUMN
-// Persistent alert cards with timestamp, entry price, source, countdown
-// Newest alerts always at the top
 // ============================================================================
 function renderAlerts(alerts, breakouts) {
   const body = document.getElementById('alertBody');
@@ -978,7 +1722,6 @@ function renderAlerts(alerts, breakouts) {
 
   document.getElementById('alertColCount').textContent = alerts.length;
 
-  // Check if alert list changed (new/removed alerts) vs just countdown ticking
   const alertFingerprint = JSON.stringify(alerts.map(a => a.id));
   const prevFingerprint = JSON.stringify(currentAlerts.map(a => a.id));
   const alertsChanged = alertFingerprint !== prevFingerprint;
@@ -987,11 +1730,9 @@ function renderAlerts(alerts, breakouts) {
   const now = Date.now();
 
   if (alertsChanged) {
-    // Full rebuild only when alerts are added/removed
     body.dataset.state = 'active';
     body.innerHTML = alerts.map(alert => buildAlertCard(alert, now)).join('');
   } else {
-    // In-place countdown update only (no flicker)
     alerts.forEach(alert => {
       const card = body.querySelector(`[data-alert-id="${alert.id}"]`);
       if (!card) return;
@@ -1007,7 +1748,6 @@ function renderAlerts(alerts, breakouts) {
         hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true
       });
 
-      // Update just the countdown text and bar
       const timeEl = card.querySelector('.alert-time');
       if (timeEl) timeEl.innerHTML = `${alertTime} &bull; ${timeLeftStr} left`;
       const barEl = card.querySelector('.alert-countdown');
@@ -1071,8 +1811,6 @@ function buildAlertCard(alert, now) {
 
 // ============================================================================
 // RENDER: VECTOR SIGNALS COLUMN
-// Tiered signal cards: ULTRA > HIGH PROB > KEY LEVEL > STANDARD > FORMING
-// In-place updates to prevent flashing
 // ============================================================================
 let lastVectorJSON = '';
 
@@ -1091,7 +1829,6 @@ function renderVectorSignals(signals) {
   const confirmed = signals.filter(s => s.tier !== 'forming');
   document.getElementById('vectorColCount').textContent = confirmed.length;
 
-  // Fingerprint to avoid unnecessary rebuilds
   const fingerprint = JSON.stringify(signals.map(s => s.ticker + s.pattern + s.tier + s.timeframe + (s.vectorLevel || '')));
   if (fingerprint === lastVectorJSON) return;
   lastVectorJSON = fingerprint;
@@ -1103,7 +1840,6 @@ function renderVectorSignals(signals) {
     const dirColor = sig.direction === 'bullish' ? 'var(--green)' : 'var(--red)';
     const dirArrow = sig.direction === 'bullish' ? '&#9650;' : '&#9660;';
 
-    // Tier badge
     let tierClass = 'tier-standard';
     let tierText = 'STANDARD';
     if (sig.tier === 'ultra') { tierClass = 'tier-ultra'; tierText = '💎 ULTRA'; }
@@ -1111,7 +1847,6 @@ function renderVectorSignals(signals) {
     else if (sig.tier === 'key_level') { tierClass = 'tier-key-level'; tierText = 'KEY LEVEL'; }
     else if (sig.tier === 'forming') { tierClass = 'tier-forming'; tierText = 'FORMING'; }
 
-    // Pattern names — custom labels
     const patternNames = {
       side_exit: 'Reversal Setup',
       side_exit_forming: 'Reversal Setup (Forming)',
@@ -1126,7 +1861,6 @@ function renderVectorSignals(signals) {
 
     const patternName = patternNames[sig.pattern] || sig.pattern;
 
-    // Extra detail
     let detail = '';
     if (sig.barsHugging) detail = `${sig.barsHugging} bars hugging`;
     if (sig.flatBars) detail = `${sig.flatBars} flat bars, single tap`;
@@ -1140,7 +1874,6 @@ function renderVectorSignals(signals) {
       if (sig.components.fibConfirm) parts.push('.618 ✓');
       detail = parts.join(' + ');
     }
-    // Vector adjustment status — the key confirmation signal
     if (sig.vectorAdjustedUp) {
       detail += (detail ? ' · ' : '') + 'Vector ↑ Primed';
     } else if (sig.detail === 'Waiting for vector adjustment') {
@@ -1236,7 +1969,6 @@ async function removeTicker(ticker) {
   }
 }
 
-// Enter key to add ticker
 document.getElementById('addTickerInput').addEventListener('keydown', (e) => {
   if (e.key === 'Enter') addTicker();
 });
